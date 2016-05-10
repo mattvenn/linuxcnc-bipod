@@ -52,7 +52,7 @@ int kinematicsForward(const double * joints,
     return -1;
 
   Dx = x;
-  Dy = -sqrt(y2); /*added a '-' to force the machine to always operate in -y */
+  Dy = sqrt(y2); /*added a '-' to force the machine to always operate in -y */
   Dz = joints[2];
 
   if (*fflags) {
