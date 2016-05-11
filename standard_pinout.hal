@@ -11,17 +11,30 @@ addf parport.0.read base-thread 1
 addf parport.0.write base-thread -1
 #
 # finally connect physical pins to the signals
-setp parport.0.pin-09-out-invert 1
 setp parport.0.pin-07-out-invert 1
-net Xstep => parport.0.pin-06-out
-net Xdir  => parport.0.pin-07-out
-net Ystep => parport.0.pin-08-out
-net Ydir  => parport.0.pin-09-out
-net Zstep => parport.0.pin-04-out
-net Zdir  => parport.0.pin-05-out
+setp parport.0.pin-01-out-invert 1
+net Xdir  => parport.0.pin-01-out
+net Xstep => parport.0.pin-02-out
+net Xen         => parport.0.pin-03-out
+setp parport.0.pin-03-out-invert 1
+net Ydir  => parport.0.pin-04-out
+net Ystep => parport.0.pin-05-out
+net Yen         => parport.0.pin-06-out
+setp parport.0.pin-06-out-invert 1
+net Zstep => parport.0.pin-08-out
+net Zdir  => parport.0.pin-09-out
 
-# create a signal for the estop loopback
-net estop-loop iocontrol.0.user-enable-out iocontrol.0.emc-enable-in
+net home-x <= parport.0.pin-11-in
+net home-y <= parport.0.pin-12-in
+net estop-ext <= parport.0.pin-13-in
+
+net home-x => axis.0.home-sw-in
+net home-y => axis.1.home-sw-in
+
+net Xen axis.0.amp-enable-out => stepgen.0.enable
+net Yen axis.1.amp-enable-out => stepgen.1.enable
+net estop-out <= iocontrol.0.user-enable-out
+net estop-ext => iocontrol.0.emc-enable-in
 
 # create signals for tool loading loopback
 #net tool-prep-loop iocontrol.0.tool-prepare iocontrol.0.tool-prepared

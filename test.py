@@ -14,20 +14,30 @@ com.wait_complete()
 com.state(linuxcnc.STATE_ON)
 com.wait_complete()
 
+#com.set_digital_out(3,1)
+logging.info(sta.din)
+logging.info(sta.dout)
 sta.poll()
 if not sta.axis[0]['homed']:
 	logging.info("homing 0")
 	com.home(0)
 	com.wait_complete() 
+	while not sta.axis[0]['homed']:
+		logging.info("homing...")
+		sta.poll()
+		time.sleep(1)
 if not sta.axis[1]['homed']:
 	logging.info("homing 1")
 	com.home(1)
 	com.wait_complete() 
+	while not sta.axis[1]['homed']:
+		logging.info("homing...")
+		sta.poll()
+		time.sleep(1)
 if not sta.axis[2]['homed']:
 	logging.info("homing 2")
 	com.home(2)
 	com.wait_complete() 
-
 # needs a little delay or homing doesn't show up as changed
 time.sleep(0.1)
 sta.poll()
