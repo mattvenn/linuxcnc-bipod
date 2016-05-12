@@ -12,7 +12,7 @@ addf parport.0.write base-thread -1
 #
 # finally connect physical pins to the signals
 setp parport.0.pin-07-out-invert 1
-setp parport.0.pin-01-out-invert 1
+#setp parport.0.pin-01-out-invert 1
 net Xdir  => parport.0.pin-01-out
 net Xstep => parport.0.pin-02-out
 net Xen         => parport.0.pin-03-out
