@@ -7,6 +7,28 @@ import linuxcnc
 import time
 logging.info("started")
 
+def run_program(file):
+	logging.info("changing to auto mode")
+	com.mode(linuxcnc.MODE_AUTO)
+	com.wait_complete() # wait until mode switch executed
+	sta.poll()
+
+	if sta.task_mode == linuxcnc.MODE_AUTO:
+		logging.info("success")
+
+	com.program_open(file)
+	com.auto(linuxcnc.AUTO_RUN, 0) # second arg is start line
+	while True:
+		sta.poll()
+		logging.info("exec state %d" % sta.exec_state)
+		logging.info("interp state %d" % sta.interp_state)
+		logging.info("state %d" % sta.state)
+		logging.info("interp errcode %d" % sta.interpreter_errcode)
+		time.sleep(1)
+		if sta.interp_state == linuxcnc.INTERP_IDLE:
+			logging.info("finished")
+			break
+
 def move_to_charge():
 	logging.info("moving back to charging position")
 	com.mode(linuxcnc.MODE_MDI)
@@ -16,7 +38,7 @@ def move_to_charge():
 		logging.info("success")
 
 	logging.info("sending gcodes")
-	com.mdi("g0 x0 y100")
+	com.mdi("g0 x0 y50")
 
 	while True:
 		sta.poll()
@@ -89,12 +111,6 @@ com.feedrate(200)
 
 ###############################
 
-logging.info("changing to auto mode")
-com.mode(linuxcnc.MODE_AUTO)
-com.wait_complete() # wait until mode switch executed
-sta.poll()
-if sta.task_mode == linuxcnc.MODE_AUTO:
-	logging.info("success")
 
 dir = '/tmp/gcodes/*ngc'
 while True:
@@ -105,18 +121,8 @@ while True:
 		continue
 
 	logging.info("starting program: %s" % files[0])
-	com.program_open(files[0])
-	com.auto(linuxcnc.AUTO_RUN, 0) # second arg is start line
-	while True:
-		sta.poll()
-		logging.info("exec state %d" % sta.exec_state)
-		logging.info("interp state %d" % sta.interp_state)
-		logging.info("state %d" % sta.state)
-		logging.info("interp errcode %d" % sta.interpreter_errcode)
-		time.sleep(1)
-		if sta.interp_state == linuxcnc.INTERP_IDLE:
-			logging.info("finished")
-			break
+	run_program(files[0])
+
 	os.remove(files[0])
 	move_to_charge()
 
