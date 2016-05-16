@@ -6,6 +6,36 @@ logging.basicConfig(level=logging.DEBUG)
 import linuxcnc
 import time
 logging.info("started")
+import pickle
+
+tmp_file = '/tmp/pos.pkl'
+pos_file = '/home/mattvenn/pos.pkl'
+safe_home_pos = { 'l' : 350, 'r': 350 }
+
+def pre_home_jog():
+	with open(pos_file) as fh:
+		pos = pickle.load(fh)
+
+	logging.info("last known pos l=%f r=%f" % (pos['l'], pos['r']))
+	logging.info("safe home pos  l=%f r=%f" % (safe_home_pos['l'], safe_home_pos['r']))
+	l_jog = safe_home_pos['l'] - pos['l']
+	r_jog = safe_home_pos['r'] - pos['r'] 
+	logging.info("jogging l=%f r=%f" % (l_jog, r_jog))
+	com = linuxcnc.command()
+	sta = linuxcnc.stat()
+	velocity = 20
+	com.jog(linuxcnc.JOG_INCREMENT, 0, velocity, l_jog)
+	com.jog(linuxcnc.JOG_INCREMENT, 1, velocity, r_jog)
+	com.wait_complete() 
+
+def atomic_write(pos):
+	with open(tmp_file, 'w') as fh:
+		pickle.dump(pos, fh)
+		# make sure that all data is on disk
+		fh.flush()
+		os.fsync(fh.fileno()) 
+
+	os.rename(tmp_file, pos_file)
 
 def run_program(file):
 	logging.info("changing to auto mode")
@@ -24,7 +54,12 @@ def run_program(file):
 		logging.info("interp state %d" % sta.interp_state)
 		logging.info("state %d" % sta.state)
 		logging.info("interp errcode %d" % sta.interpreter_errcode)
-		time.sleep(1)
+		# store the position on the disk in case of a power failure
+		joints = sta.joint_actual_position
+		pos = { 'l' : joints[0], 'r' : joints[1] }
+		print(pos)
+		atomic_write(pos)
+		time.sleep(0.5)
 		if sta.interp_state == linuxcnc.INTERP_IDLE:
 			logging.info("finished")
 			break
@@ -59,9 +94,8 @@ com.wait_complete()
 com.state(linuxcnc.STATE_ON)
 com.wait_complete()
 
-#com.set_digital_out(3,1)
-logging.info(sta.din)
-logging.info(sta.dout)
+pre_home_jog()
+
 sta.poll()
 if not sta.axis[0]['homed']:
 	logging.info("homing 0")

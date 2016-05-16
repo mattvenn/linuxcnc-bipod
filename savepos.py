@@ -17,11 +17,12 @@ def atomic_write(pos):
 
 	os.rename(tmp_file, pos_file)
 
-while True:
-	sta.poll()
-	joints = sta.joint_actual_position
-	pos = { 'l' : joints[0], 'r' : joints[1] }
-	print(pos)
-	atomic_write(pos)
-	time.sleep(1)
+if __name__ == '__main__':
+	while True:
+		sta.poll()
+		joints = sta.joint_actual_position
+		pos = { 'l' : joints[0], 'r' : joints[1] }
+		print(pos)
+		atomic_write(pos)
+		time.sleep(1)
 
