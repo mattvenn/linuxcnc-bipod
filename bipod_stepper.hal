@@ -3,9 +3,10 @@
 # first load the core RT modules that will be needed
 # kinematics
 loadrt bipodkins
+loadusr pass.py
 #setp bipodkins.Bx 1220
 #setp bipodkins.Bx 2597
-setp bipodkins.Bx 430
+setp bipodkins.Bx 450
 
 # motion controller, get name and thread periods from ini file
 loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EMCMOT]SERVO_PERIOD traj_period_nsec=[EMCMOT]TRAJ_PERIOD key=[EMCMOT]SHMEM_KEY
@@ -39,6 +40,7 @@ linksp Ypos => stepgen.1.position-cmd
 newsig Zpos float
 linksp Zpos <= axis.2.motor-pos-cmd
 linksp Zpos => stepgen.2.position-cmd
+linksp Zpos => passthrough.in
 
 # loop position commands back to motion module feedback
 linksp Xpos => axis.0.motor-pos-fb
