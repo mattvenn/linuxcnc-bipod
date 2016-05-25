@@ -3,7 +3,7 @@
 # first load the core RT modules that will be needed
 # kinematics
 loadrt bipodkins
-loadusr pass.py
+loadusr xbee.py
 #setp bipodkins.Bx 1220
 #setp bipodkins.Bx 2597
 setp bipodkins.Bx 450
@@ -40,7 +40,7 @@ linksp Ypos => stepgen.1.position-cmd
 newsig Zpos float
 linksp Zpos <= axis.2.motor-pos-cmd
 linksp Zpos => stepgen.2.position-cmd
-linksp Zpos => passthrough.in
+linksp Zpos => xbee.in
 
 # loop position commands back to motion module feedback
 linksp Xpos => axis.0.motor-pos-fb
